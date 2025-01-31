@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/dist/output.css" />
+    <title>Tic Tac Toe</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        text-align: center;
+      }
+      #board {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-gap: 5px;
+        margin: 20px auto;
+        width: 320px;
+      }
+      .cell {
+        width: 100px;
+        height: 100px;
+        background: #f0f0f0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .cell.taken {
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Title -->
+    <div>
+      <h1 class="md:text-4xl text-2xl my-[50px]">Tic Tac Toe</h1>
+      <!-- Main Input -->
+      <div class="flex flex-col items-center">
+        <input type="text" id="room" placeholder="Enter room name" class="border-2 px-4 py-2 my-2" />
+        <button id="joinGame" class="my-2 px-20 py-2 bg-neutral-300">Join Game</button>
+      </div>
+    </div>
+
+    <!-- New Game Button -->
+    <a href="/" class="absolute top-5 right-5 my-2 p-4 bg-neutral-300 rounded-full"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-6"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+    </a>
+
+    <!-- Main -->
+    <div id="messages"></div>
+
+    <div class="my-10">
+      <div id="board"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="">Created by Hedy Samer</div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const boardElement = document.getElementById('board');
+      const messagesElement = document.getElementById('messages');
+      const joinButton = document.getElementById('joinGame');
+      const roomInput = document.getElementById('room');
+
+      let room = null;
+      let game = null;
+
+      joinButton.addEventListener('click', () => {
+        room = roomInput.value;
+        if (!room) {
+          alert('Enter a room name!');
+          return;
+        }
+        socket.emit('joinGame', room);
+      });
+
+      socket.on('updateGame', (updatedGame) => {
+        game = updatedGame;
+        renderBoard();
+      });
+
+      socket.on('message', (message) => {
+        const msg = document.createElement('div');
+        msg.textContent = message;
+        messagesElement.appendChild(msg);
+      });
+
+      function renderBoard() {
+        boardElement.innerHTML = '';
+        if (!game) return;
+
+        game.board.forEach((cell, index) => {
+          const cellElement = document.createElement('div');
+          cellElement.classList.add('cell');
+          if (cell) {
+            cellElement.textContent = cell;
+            cellElement.classList.add('taken');
+          }
+          cellElement.addEventListener('click', () => makeMove(index));
+          boardElement.appendChild(cellElement);
+        });
+      }
+
+      function makeMove(index) {
+        if (!game || game.board[index]) return;
+        socket.emit('makeMove', { room, index });
+      }
+    </script>
+  </body>
+</html>
