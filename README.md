@@ -7,7 +7,7 @@ This project is a multiplayer Tic Tac Toe game built for an assignment using Nod
 first you need to clone my project with git
 
 ```bash
-  git clone [link](https://github.com/Hed10z/tic-toc-toe-multiplayer.git)
+  git clone https://github.com/Hed10z/tic-toc-toe-multiplayer.git
 ```
 
 then run this command for install all package you need
